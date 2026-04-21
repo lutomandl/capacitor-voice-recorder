@@ -1,0 +1,45 @@
+import type { AudioChunk, ChunkedRecordingOptions, CurrentRecordingStatus, GenericResponse, RecordingData, RecordingOptions } from './definitions';
+declare const POSSIBLE_MIME_TYPES: {
+    'audio/aac': string;
+    'audio/mp4': string;
+    'audio/webm;codecs=opus': string;
+    'audio/webm': string;
+    'audio/ogg;codecs=opus': string;
+};
+export declare type AudioChunkEmitter = (chunk: AudioChunk) => void;
+export declare class VoiceRecorderImpl {
+    private mediaRecorder;
+    private chunks;
+    private pendingResult;
+    private chunkedStream;
+    private chunkedRecorder;
+    private chunkedBuffer;
+    private chunkedInterval;
+    private chunkedTimer;
+    private chunkIndex;
+    private chunkedEmitter;
+    private chunkedMimeType;
+    static canDeviceVoiceRecord(): Promise<GenericResponse>;
+    startRecording(options?: RecordingOptions): Promise<GenericResponse>;
+    stopRecording(): Promise<RecordingData>;
+    static hasAudioRecordingPermission(): Promise<GenericResponse>;
+    static requestAudioRecordingPermission(): Promise<GenericResponse>;
+    pauseRecording(): Promise<GenericResponse>;
+    resumeRecording(): Promise<GenericResponse>;
+    getCurrentStatus(): Promise<CurrentRecordingStatus>;
+    setChunkEmitter(emitter: AudioChunkEmitter | null): void;
+    startChunkedRecording(options?: ChunkedRecordingOptions): Promise<GenericResponse>;
+    stopChunkedRecording(): Promise<GenericResponse>;
+    pauseChunkedRecording(): Promise<GenericResponse>;
+    resumeChunkedRecording(): Promise<GenericResponse>;
+    static getSupportedMimeType<T extends keyof typeof POSSIBLE_MIME_TYPES>(): T | null;
+    private onSuccessfullyStartedRecording;
+    private startNewChunkedRecorder;
+    private scheduleNextChunk;
+    private rotateChunkAndEmit;
+    private onFailedToStartRecording;
+    private static blobToBase64;
+    private prepareInstanceForNextOperation;
+    private prepareChunkedInstanceForNextOperation;
+}
+export {};

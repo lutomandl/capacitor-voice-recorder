@@ -1,5 +1,5 @@
 # node files
-dist
+# dist is intentionally committed so git-installed consumers don't need a build step
 node_modules
 
 # iOS files
