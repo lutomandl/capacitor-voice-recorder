@@ -370,13 +370,11 @@ export class VoiceRecorderImpl {
         duration = 0;
       }
       const chunk: AudioChunk = {
-        value: {
-          recordDataBase64: base64,
-          msDuration: Math.round(duration),
-          mimeType,
-          chunkIndex: this.chunkIndex,
-          isFinalChunk,
-        },
+        recordDataBase64: base64,
+        msDuration: Math.round(duration),
+        mimeType,
+        chunkIndex: this.chunkIndex,
+        isFinalChunk,
       };
       this.chunkedEmitter?.(chunk);
       this.chunkIndex++;
