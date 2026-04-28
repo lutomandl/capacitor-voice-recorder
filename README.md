@@ -383,7 +383,7 @@ let listener: PluginListenerHandle | undefined;
 async function startMeeting() {
   // Register the listener BEFORE starting so the first chunk isn't missed.
   listener = await VoiceRecorder.addListener('audioChunk', (chunk: AudioChunk) => {
-    const { recordDataBase64, msDuration, mimeType, chunkIndex, isFinalChunk } = chunk.value;
+    const { recordDataBase64, msDuration, mimeType, chunkIndex, isFinalChunk } = chunk;
     // Upload the chunk, decode it, feed it to a transcription service, etc.
     console.log(`chunk ${chunkIndex} (${msDuration}ms, ${mimeType}), final=${isFinalChunk}`);
   });

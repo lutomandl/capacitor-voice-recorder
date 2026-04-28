@@ -405,18 +405,46 @@
     {
       "name": "AudioChunk",
       "slug": "audiochunk",
-      "docs": "Payload emitted for each audio chunk during chunked recording.\nEach chunk is a self-contained audio file that can be decoded and\ntranscribed independently (e.g. uploaded to a transcription service).",
+      "docs": "Payload emitted for each audio chunk during chunked recording.\nEach chunk is a self-contained audio file that can be decoded and\ntranscribed independently (e.g. uploaded to a transcription service).\n\nShape follows the Capacitor listener convention: `notifyListeners(name, data)`\ndelivers `data` directly to JS callbacks (no `{ value: ... }` envelope).",
       "tags": [],
       "methods": [],
       "properties": [
         {
-          "name": "value",
+          "name": "recordDataBase64",
           "tags": [],
           "docs": "",
           "complexTypes": [
             "Base64String"
           ],
-          "type": "{ recordDataBase64: string; msDuration: number; mimeType: string; chunkIndex: number; isFinalChunk: boolean; }"
+          "type": "Base64String"
+        },
+        {
+          "name": "msDuration",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "number"
+        },
+        {
+          "name": "mimeType",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "string"
+        },
+        {
+          "name": "chunkIndex",
+          "tags": [],
+          "docs": "0-based sequential index of this chunk within the recording session.",
+          "complexTypes": [],
+          "type": "number"
+        },
+        {
+          "name": "isFinalChunk",
+          "tags": [],
+          "docs": "True only for the chunk emitted when stopChunkedRecording() is called.",
+          "complexTypes": [],
+          "type": "boolean"
         }
       ]
     }

@@ -13,17 +13,18 @@ export interface RecordingData {
  * Payload emitted for each audio chunk during chunked recording.
  * Each chunk is a self-contained audio file that can be decoded and
  * transcribed independently (e.g. uploaded to a transcription service).
+ *
+ * Shape follows the Capacitor listener convention: `notifyListeners(name, data)`
+ * delivers `data` directly to JS callbacks (no `{ value: ... }` envelope).
  */
 export interface AudioChunk {
-    value: {
-        recordDataBase64: Base64String;
-        msDuration: number;
-        mimeType: string;
-        /** 0-based sequential index of this chunk within the recording session. */
-        chunkIndex: number;
-        /** True only for the chunk emitted when stopChunkedRecording() is called. */
-        isFinalChunk: boolean;
-    };
+    recordDataBase64: Base64String;
+    msDuration: number;
+    mimeType: string;
+    /** 0-based sequential index of this chunk within the recording session. */
+    chunkIndex: number;
+    /** True only for the chunk emitted when stopChunkedRecording() is called. */
+    isFinalChunk: boolean;
 }
 export declare type RecordingOptions = never | {
     directory: Directory;
