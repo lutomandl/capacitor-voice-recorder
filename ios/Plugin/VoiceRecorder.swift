@@ -7,6 +7,7 @@ public class VoiceRecorder: CAPPlugin {
 
     private var customMediaRecorder: CustomMediaRecorder?
     private var chunkedMediaRecorder: ChunkedMediaRecorder?
+    private let recordingNotification = RecordingNotification()
 
     @objc func canDeviceVoiceRecord(_ call: CAPPluginCall) {
         call.resolve(ResponseGenerator.successResponse())
@@ -168,6 +169,7 @@ public class VoiceRecorder: CAPPlugin {
             chunkedMediaRecorder = nil
             call.reject(Messages.CANNOT_RECORD_ON_THIS_PHONE)
         } else {
+            recordingNotification.start()
             call.resolve(ResponseGenerator.successResponse())
         }
     }
@@ -180,6 +182,7 @@ public class VoiceRecorder: CAPPlugin {
 
         chunkedMediaRecorder?.stopRecording()
         chunkedMediaRecorder = nil
+        recordingNotification.stop()
         call.resolve(ResponseGenerator.successResponse())
     }
 
