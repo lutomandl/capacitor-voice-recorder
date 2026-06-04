@@ -60,7 +60,10 @@ class ChunkedMediaRecorder {
 
             recordingSession = AVAudioSession.sharedInstance()
             originalRecordingSessionCategory = recordingSession.category
-            try recordingSession.setCategory(AVAudioSession.Category.playAndRecord)
+            // playAndRecord keeps capturing while the app is backgrounded (the app must also
+            // declare the `audio` UIBackgroundMode). allowBluetooth enables BT headset mics;
+            // mixWithOthers avoids tearing down other apps' audio for a record-only session.
+            try recordingSession.setCategory(.playAndRecord, mode: .default, options: [.allowBluetooth, .mixWithOthers])
             try recordingSession.setActive(true)
 
             currentChunkPath = makeChunkPath()

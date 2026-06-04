@@ -211,9 +211,14 @@ public class VoiceRecorder extends Plugin {
             chunkedMediaRecorder = new ChunkedMediaRecorder(getContext(), options, chunkIntervalMs, this);
             chunkedMediaRecorder.setOnInterruptionBegan(() -> notifyListeners("voiceRecordingInterrupted", null));
             chunkedMediaRecorder.setOnInterruptionEnded(() -> notifyListeners("voiceRecordingInterruptionEnded", null));
+            // Start the foreground service while the app is in foreground (this WebView call
+            // guarantees that), so background mic capture survives — Android 14 requires the
+            // microphone-typed FGS to be started from the foreground.
+            RecordingForegroundService.start(getContext());
             chunkedMediaRecorder.startRecording();
             call.resolve(ResponseGenerator.successResponse());
         } catch (Exception exp) {
+            RecordingForegroundService.stop(getContext());
             chunkedMediaRecorder = null;
             call.reject(Messages.FAILED_TO_RECORD, exp);
         }
@@ -231,6 +236,7 @@ public class VoiceRecorder extends Plugin {
         } catch (Exception exp) {
             call.reject(Messages.FAILED_TO_FETCH_RECORDING, exp);
         } finally {
+            RecordingForegroundService.stop(getContext());
             chunkedMediaRecorder = null;
         }
     }
