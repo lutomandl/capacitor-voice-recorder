@@ -4,10 +4,7 @@ import UserNotifications
 
 /// Surfaces a "recording in progress" notification in Notification Center while a chunked
 /// recording runs — the iOS counterpart to the Android foreground-service notification.
-///
-/// We post it as soon as recording starts (the host app's notification delegate presents
-/// foreground notifications) and re-post whenever the app enters the background (where iOS
-/// delivers it straight into Notification Center). It stays until recording stops.
+/// Posted when recording starts and re-posted when the app enters the background; cleared on stop.
 class RecordingNotification {
 
     private static let identifier = "voice_recording_active"
@@ -18,24 +15,18 @@ class RecordingNotification {
     func start() {
         isActive = true
 
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, error in
-            NSLog("[VoiceRecorder] RecordingNotification auth granted=\(granted) error=\(String(describing: error))")
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
+
+        let observer = NotificationCenter.default.addObserver(
+            forName: UIApplication.didEnterBackgroundNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            guard self?.isActive == true else { return }
             RecordingNotification.post()
         }
+        observers.append(observer)
 
-        let center = NotificationCenter.default
-        for name in [UIApplication.didEnterBackgroundNotification, UIApplication.willResignActiveNotification] {
-            observers.append(
-                center.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
-                    guard self?.isActive == true else { return }
-                    NSLog("[VoiceRecorder] RecordingNotification re-post on \(name.rawValue)")
-                    RecordingNotification.post()
-                }
-            )
-        }
-
-        // Post immediately too — recording starts in the foreground, which the host app's
-        // UNUserNotificationCenter delegate presents.
         RecordingNotification.post()
     }
 
@@ -47,26 +38,14 @@ class RecordingNotification {
     }
 
     private static func post() {
-        let center = UNUserNotificationCenter.current()
-        center.getNotificationSettings { settings in
-            NSLog("[VoiceRecorder] RecordingNotification post; authStatus=\(settings.authorizationStatus.rawValue)")
-            let content = UNMutableNotificationContent()
-            content.title = "Recording"
-            content.body = "Meeting recording in progress"
-            // No sound — passive ongoing-recording indicator.
-            // Use a short time-interval trigger instead of nil: a nil trigger delivers
-            // "immediately" and can be swallowed in some app/FCM notification setups, whereas a
-            // scheduled trigger reliably lands in Notification Center.
-            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
-            let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
-            center.add(request) { error in
-                if let error = error {
-                    NSLog("[VoiceRecorder] RecordingNotification add error: \(error)")
-                } else {
-                    NSLog("[VoiceRecorder] RecordingNotification add OK (scheduled)")
-                }
-            }
-        }
+        let content = UNMutableNotificationContent()
+        content.title = "Recording"
+        content.body = "Meeting recording in progress"
+        // A short scheduled trigger (rather than a nil "immediate" trigger) reliably lands the
+        // notification in Notification Center in this FCM-integrated app.
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+        UNUserNotificationCenter.current().add(request)
     }
 
     private static func clear() {
