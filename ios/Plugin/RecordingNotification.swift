@@ -54,10 +54,16 @@ class RecordingNotification {
             content.title = "Recording"
             content.body = "Meeting recording in progress"
             // No sound — passive ongoing-recording indicator.
-            let request = UNNotificationRequest(identifier: identifier, content: content, trigger: nil)
+            // Use a short time-interval trigger instead of nil: a nil trigger delivers
+            // "immediately" and can be swallowed in some app/FCM notification setups, whereas a
+            // scheduled trigger reliably lands in Notification Center.
+            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+            let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
             center.add(request) { error in
                 if let error = error {
                     NSLog("[VoiceRecorder] RecordingNotification add error: \(error)")
+                } else {
+                    NSLog("[VoiceRecorder] RecordingNotification add OK (scheduled)")
                 }
             }
         }
